@@ -1,10 +1,18 @@
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from jinja2_fragments.fastapi import Jinja2Blocks
 
-from contact import Contact
+from contacts import Contact
 
-
+Contact.load_db()
+APP_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = APP_DIR / "templates"
+STATIC_DIR = APP_DIR / "static"
+templates = Jinja2Blocks(TEMPLATE_DIR)
 app = FastAPI(default_response_class=HTMLResponse)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 @app.get("/")
@@ -16,7 +24,11 @@ def index():
 def contacts(request: Request):
     query = request.query_params.get("q")
 
-    if not query:
+    if query:
         contacts_set = Contact.search(query)
     else:
-        contacts_set = Contact.contacts
+        contacts_set = Contact.all()
+
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "contacts": contacts_set}
+    )
