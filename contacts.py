@@ -18,6 +18,7 @@ class Contact:
         self.last = last
         self.phone = phone
         self.email = email
+        self.errors = {}
 
     def save(self):
         if self.id is None:
