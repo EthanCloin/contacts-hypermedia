@@ -54,9 +54,47 @@ async def contacts_new(request: Request, response: Response):
     )
 
     if c.save():
-        request.session["message"] = "Created New Contact!"
+        request.session.setdefault("messages", []).append("Created New Contact!")
         return RedirectResponse("/contacts", status_code=301)
     else:
         return templates.TemplateResponse(
             "new.html", {"request": request, "contact": c}
         )
+
+
+@app.get("/contacts/{contact_id}")
+def get_show_contact(request: Request, contact_id: int):
+    return templates.TemplateResponse(
+        "show.html", {"request": request, "contact": Contact.find(contact_id)}
+    )
+
+
+@app.get("/contacts/{contact_id}/edit")
+def get_edit_contact(request: Request, contact_id: int):
+    return templates.TemplateResponse(
+        "edit.html", {"request": request, "contact": Contact.find(contact_id)}
+    )
+
+
+@app.post("/contacts/{contact_id}/edit")
+async def edit_contact(request: Request, contact_id: int):
+    form = await request.form()
+    c: Contact = Contact.find(contact_id)
+    c.update(
+        first=form["first_name"],
+        last=form["last_name"],
+        phone=form["phone"],
+        email=form["email"],
+    )
+    if c.save():
+        request.session.setdefault("messages", []).append("Updated Contact!")
+        return RedirectResponse("/contacts", status_code=301)
+    return templates.TemplateResponse("edit.html", {"request": request, "contact": c})
+
+
+@app.post("/contacts/{contact_id}/delete")
+async def delete_contact(request: Request, contact_id: int):
+    c: Contact = Contact.find(contact_id)
+    c.delete()
+    request.session.setdefault("messages", []).append("Deleted Contact!")
+    return RedirectResponse("/contacts", status_code=301)

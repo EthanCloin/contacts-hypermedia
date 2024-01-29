@@ -10,10 +10,16 @@
       href="https://the.missing.style/v0.2.0/missing.min.css"
     />
     <link rel="stylesheet" href="{{ url_for('static', path='main.css') }}" />
-    x
-    <title>Contacts</title>
+    <title>Contact App</title>
+    <h1>
+      <p style="text-transform: uppercase">contacts.app</p>
+      <p>A Demo Contacts Application</p>
+    </h1>
   </head>
   <body>
+    <!-- {% if request.session.messages %} {% for msg in request.session.messages %}
+    <div class="flash">{{ msg }}</div>
+    {% endfor %} {% endif %} -->
     {% block content %}
     <h1>Hello World</h1>
     {% endblock %}

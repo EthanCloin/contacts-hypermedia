@@ -20,6 +20,12 @@ class Contact:
         self.email = email
         self.errors = {}
 
+    def update(self, first, last, phone, email):
+        self.first = first
+        self.last = last
+        self.phone = phone
+        self.email = email
+
     def save(self):
         if self.id is None:
             if len(Contact.db) == 0:
@@ -30,6 +36,23 @@ class Contact:
             Contact.db[self.id] = self
         Contact.save_db()
         return True
+
+    def validate(self):
+        if not self.email:
+            self.errors["email"] = "Email Required"
+        existing_contact = next(
+            filter(
+                lambda c: c.id != self.id and c.email == self.email, Contact.db.values()
+            ),
+            None,
+        )
+        if existing_contact:
+            self.errors["email"] = "Email Must Be Unique"
+        return len(self.errors) == 0
+
+    def delete(self):
+        del Contact.db[self.id]
+        Contact.save_db()
 
     @classmethod
     def search(cls, text):
@@ -65,3 +88,12 @@ class Contact:
                 cls.db[c["id"]] = Contact(
                     c["id"], c["first"], c["last"], c["phone"], c["email"]
                 )
+
+    @classmethod
+    def find(cls, id_):
+        id_ = int(id_)
+        c = cls.db.get(id_)
+        if c is not None:
+            c.errors = {}
+
+        return c
